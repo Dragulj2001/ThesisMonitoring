@@ -1,23 +1,21 @@
 # Build faza
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Kopiramo .csproj direktno (jer je on sada u root-u na GitHub-u)
-COPY ["ThesisWebApp.csproj", "./"]
-RUN dotnet restore "ThesisWebApp.csproj"
+# Kopiraj samo .csproj i uradi restore (ovo je brže)
+COPY *.csproj ./
+RUN dotnet restore
 
-# Kopiramo sav ostali kod
+# Kopiraj sve ostalo i napravi build
 COPY . .
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
-# Publish aplikacije
-RUN dotnet publish "ThesisWebApp.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-# Finalna faza (Runtime)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+# Runtime faza
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Render koristi PORT varijablu, ASP.NET treba da sluša na 0.0.0.0
+# Podešavanje za Render
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080
 
