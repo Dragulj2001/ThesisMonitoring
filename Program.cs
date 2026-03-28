@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ThesisWebApp.Data;
 using ThesisWebApp.Models;
@@ -68,9 +69,21 @@ else
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
-        await services.GetRequiredService<ApplicationIdentityDbContext>().Database.MigrateAsync();
-        await services.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
-        await IdentitySeeder.SeedAsync(services);
+        var config = services.GetRequiredService<IConfiguration>();
+        var connectionString = config.GetConnectionString("DefaultConnection");
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            Console.WriteLine("@@@ GREŠKA: Connection String nije pronađen u konfiguraciji! @@@");
+        }
+        else
+        {
+            Console.WriteLine("@@@ Pokušavam migraciju baze podataka... @@@");
+            await services.GetRequiredService<ApplicationIdentityDbContext>().Database.MigrateAsync();
+            await services.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+            await IdentitySeeder.SeedAsync(services);
+            Console.WriteLine("@@@ Migracija i Seed završeni uspešno! @@@");
+        }
     }
 }
 
