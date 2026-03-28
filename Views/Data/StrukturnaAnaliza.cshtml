@@ -1,0 +1,484 @@
+@model ThesisWebApp.Models.StrukturnaAnalizaViewModel
+@using System.Globalization
+@using Microsoft.AspNetCore.Authorization
+@using ThesisWebApp.Models
+
+@{
+    ViewData["Title"] = "Strukturna Analiza";
+    var limit = (double)(ViewBag.Limit ?? 0.15);
+    var limitSrel = (double)(ViewBag.LimitSrel ?? 0.02);
+    var hasMostovi = Model.Mostovi.Count > 0;
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<style>
+    .srel-status-banner {
+        border: none;
+        border-radius: 0.375rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        letter-spacing: 0.02em;
+        text-align: center;
+        margin-bottom: 1rem;
+        padding: 0.85rem 1rem;
+    }
+
+    .srel-status-banner--danger {
+        background-color: #b02a37;
+        color: #fff;
+    }
+
+    .srel-status-banner--ok {
+        background-color: #146c43;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .srel-banner-sub {
+        font-weight: 600;
+        font-size: 0.95rem;
+        letter-spacing: 0.01em;
+    }
+
+</style>
+
+<div class="container-fluid px-3 pb-3">
+    @if (isAdmin || hasMostovi)
+    {
+        <div class="analiza-most-bar rounded-top px-3 py-2 mb-3 border" style="background-color: #dee2e6; border-color: #ced4da !important;">
+            <div class="d-flex flex-wrap align-items-center gap-3 w-100">
+                @if (hasMostovi)
+                {
+                    <form method="get" asp-controller="Data" asp-action="StrukturnaAnaliza" id="strukturnaMostSelectForm" class="d-flex flex-wrap align-items-center gap-2 mb-0 flex-grow-1">
+                        <label for="strukturnaMostIdSelect" class="form-label mb-0 fw-semibold text-secondary">Izaberi most</label>
+                        <select id="strukturnaMostIdSelect" name="mostId" class="form-select form-select-sm" style="min-width: 200px; max-width: 360px;" onchange="this.form.submit()">
+                            @foreach (var m in Model.Mostovi)
+                            {
+                                if (Model.SelectedMostId == m.Id)
+                                {
+                                    <option value="@m.Id" selected>@m.Naziv</option>
+                                }
+                                else
+                                {
+                                    <option value="@m.Id">@m.Naziv</option>
+                                }
+                            }
+                        </select>
+                    </form>
+                }
+                else
+                {
+                    <p class="mb-0 text-secondary small">Još uvek nema unetih mostova.</p>
+                }
+            </div>
+        </div>
+    }
+
+    @* Baner: crveno ako postoji S_rel > LimitSrel i (nema potvrde ili postoji tačka posle vremena potvrde). Potvrda se briše pri promeni LimitSrel u Postavke. *@
+    @if (Model.SrelStructuralAlarm)
+    {
+        <div class="alert srel-status-banner srel-status-banner--danger mb-0 border-0 d-flex flex-column align-items-center gap-2" role="alert">
+            <div>
+                <div>DETEKTOVANO PREKORAČENJE LIMITA</div>
+                @if (Model.MaxSrelSeriesMm.HasValue)
+                {
+                    <div class="srel-banner-sub mt-2">Maksimalno ulegnuće: @Model.MaxSrelSeriesMm.Value.ToString("F2", CultureInfo.InvariantCulture) mm</div>
+                }
+            </div>
+            @if (Model.ShowAcknowledgeSrelAlarm && Model.SelectedMostId is { } ackMostId)
+            {
+                <form asp-controller="Data" asp-action="AcknowledgeSrelAlarm" method="post" class="mb-0">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="mostId" value="@ackMostId" />
+                    <button type="submit" class="btn btn-warning text-dark fw-semibold px-4">Potvrdi alarm</button>
+                </form>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert srel-status-banner srel-status-banner--ok mb-0 border-0" role="alert">
+            <div>Konstrukcija je stabilna</div>
+            @if (Model.MaxSrelSeriesMm.HasValue)
+            {
+                <div class="srel-banner-sub mt-2 opacity-90">Maksimalno ulegnuće: @Model.MaxSrelSeriesMm.Value.ToString("F2", CultureInfo.InvariantCulture) mm</div>
+            }
+        </div>
+    }
+
+    <h2 class="mb-3 mt-3">Strukturna Analiza</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <span class="fw-semibold">Bočni profil mosta</span>
+            <span class="text-muted small ms-2">
+                @if (Model.JedanStubMost)
+                {
+                    <text>Uloge: @PrizmaUloga.Vrh, @PrizmaUloga.Dno, @PrizmaUloga.Sredina (jedan stub).</text>
+                }
+                else
+                {
+                    <text>@PrizmaUloga.Dno1 / @PrizmaUloga.Vrh1 levi stub · @PrizmaUloga.Sredina · @PrizmaUloga.Dno2 / @PrizmaUloga.Vrh2 desni.</text>
+                }
+            </span>
+        </div>
+        <div class="card-body p-2 p-md-3">
+            <p class="small text-muted mb-2 mb-md-3">
+                Granica alarma d3d: <strong>@limit.ToString("F3", CultureInfo.InvariantCulture)</strong>
+            </p>
+            <style>
+                .bridge-svg-wrap {
+                    width: 100%;
+                    max-width: 1100px;
+                    margin: 0 auto;
+                    border-radius: 0.5rem;
+                    overflow: hidden;
+                    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.12);
+                    background: #f1f5f9;
+                    line-height: 0;
+                }
+
+                .bridge-svg-wrap svg {
+                    display: block;
+                    width: 100%;
+                    height: auto;
+                }
+
+                .bridge-cable {
+                    stroke: #94a3b8;
+                    stroke-width: 1.15;
+                    fill: none;
+                    stroke-linecap: round;
+                }
+
+                .bridge-structure {
+                    fill: none;
+                    stroke: #1e293b;
+                    stroke-width: 3.2;
+                    stroke-linejoin: round;
+                    stroke-linecap: round;
+                }
+
+                .bridge-structure-fill {
+                    fill: #334155;
+                    stroke: #1e293b;
+                    stroke-width: 2;
+                }
+
+                .bridge-marker-dot {
+                    cursor: default;
+                    stroke: #ffffff;
+                    stroke-width: 2.5;
+                }
+
+                .bridge-marker--ok {
+                    fill: #198754;
+                }
+
+                .bridge-marker--warn {
+                    fill: #ffc107;
+                }
+
+                .bridge-marker--alarm {
+                    fill: #dc3545;
+                }
+
+                .bridge-marker--none {
+                    fill: #6c757d;
+                }
+            </style>
+
+            <div class="bridge-svg-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" role="img" aria-label="Bočni profil mosta sa pozicijama prizmi">
+                    <title>Profil mosta — strukturna analiza</title>
+                    @if (Model.JedanStubMost)
+                    {
+                        <desc>Jedan centralni pilon, kolovoz i užad; tačke merenja po ulozi.</desc>
+                    }
+                    else
+                    {
+                        <desc>Dva pilona, kolovoz i užad; tačke merenja po ulozi.</desc>
+                    }
+
+                    <rect width="800" height="320" fill="#f8fafc" />
+
+                    @if (Model.JedanStubMost)
+                    {
+                    @* Užad — centralni pilon (simetrično) *@
+                    <g id="cables-center" aria-hidden="true">
+                        <line class="bridge-cable" x1="400" y1="54" x2="437" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="363" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="474" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="326" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="511" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="289" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="548" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="252" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="585" y2="202" />
+                        <line class="bridge-cable" x1="400" y1="54" x2="215" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="455" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="345" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="492" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="308" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="529" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="271" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="566" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="234" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="603" y2="202" />
+                        <line class="bridge-cable" x1="406" y1="66" x2="197" y2="202" />
+                    </g>
+
+                    <g id="pylon-center">
+                        <path class="bridge-structure-fill" d="M 384 272 L 416 272 L 416 202 L 408 50 L 392 50 L 384 202 Z" />
+                    </g>
+
+                    <path id="deck-middle" class="bridge-structure" d="M 72 202 L 728 202" />
+                    }
+                    else
+                    {
+
+                    @* Užad — levi pilon *@
+                    <g id="cables-left" aria-hidden="true">
+                        <line class="bridge-cable" x1="158" y1="54" x2="195" y2="202" />
+                        <line class="bridge-cable" x1="158" y1="54" x2="232" y2="202" />
+                        <line class="bridge-cable" x1="158" y1="54" x2="269" y2="202" />
+                        <line class="bridge-cable" x1="158" y1="54" x2="306" y2="202" />
+                        <line class="bridge-cable" x1="158" y1="54" x2="343" y2="202" />
+                        <line class="bridge-cable" x1="164" y1="66" x2="213" y2="202" />
+                        <line class="bridge-cable" x1="164" y1="66" x2="250" y2="202" />
+                        <line class="bridge-cable" x1="164" y1="66" x2="287" y2="202" />
+                        <line class="bridge-cable" x1="164" y1="66" x2="324" y2="202" />
+                        <line class="bridge-cable" x1="164" y1="66" x2="361" y2="202" />
+                    </g>
+
+                    @* Užad — desni pilon *@
+                    <g id="cables-right" aria-hidden="true">
+                        <line class="bridge-cable" x1="642" y1="54" x2="605" y2="202" />
+                        <line class="bridge-cable" x1="642" y1="54" x2="568" y2="202" />
+                        <line class="bridge-cable" x1="642" y1="54" x2="531" y2="202" />
+                        <line class="bridge-cable" x1="642" y1="54" x2="494" y2="202" />
+                        <line class="bridge-cable" x1="642" y1="54" x2="457" y2="202" />
+                        <line class="bridge-cable" x1="636" y1="66" x2="587" y2="202" />
+                        <line class="bridge-cable" x1="636" y1="66" x2="550" y2="202" />
+                        <line class="bridge-cable" x1="636" y1="66" x2="513" y2="202" />
+                        <line class="bridge-cable" x1="636" y1="66" x2="476" y2="202" />
+                        <line class="bridge-cable" x1="636" y1="66" x2="439" y2="202" />
+                    </g>
+
+                    @* Levi pilon (podnožje ispod kolovoza, vrh iznad; kolovoz y = 202) *@
+                    <g id="pylon-left">
+                        <path class="bridge-structure-fill" d="M 142 272 L 174 272 L 174 202 L 166 50 L 150 50 L 142 202 Z" />
+                    </g>
+
+                    @* Desni pilon *@
+                    <g id="pylon-right">
+                        <path class="bridge-structure-fill" d="M 626 272 L 658 272 L 658 202 L 650 50 L 634 50 L 626 202 Z" />
+                    </g>
+
+                    @* Kolovoz *@
+                    <path id="deck-middle" class="bridge-structure" d="M 72 202 L 728 202" />
+                    }
+
+                    @* Interaktivne tačke prizmi *@
+                    <g id="prism-markers">
+                        @foreach (var m in Model.Markers)
+                        {
+                            var d3dText = m.LatestD3d.HasValue
+                                ? m.LatestD3d.Value.ToString("F4", CultureInfo.InvariantCulture)
+                                : "—";
+                            var statusText = m.StatusTier switch
+                            {
+                                "OK" => "OK",
+                                "WARN" => "WARN",
+                                "ALARM" => "ALARM",
+                                _ => "nema merenja"
+                            };
+                            var tierClass = m.StatusTier switch
+                            {
+                                "OK" => "bridge-marker--ok",
+                                "WARN" => "bridge-marker--warn",
+                                "ALARM" => "bridge-marker--alarm",
+                                _ => "bridge-marker--none"
+                            };
+                            var tip = string.IsNullOrWhiteSpace(m.Uloga)
+                                ? $"{m.Ime} — d3d: {d3dText} — {statusText}"
+                                : $"{m.Uloga} ({m.Ime}) — d3d: {d3dText} — {statusText}";
+                            <circle class="bridge-marker-dot @tierClass"
+                                    cx="@m.SvgCx.ToString(CultureInfo.InvariantCulture)"
+                                    cy="@m.SvgCy.ToString(CultureInfo.InvariantCulture)"
+                                    r="11"
+                                    role="graphics-symbol"
+                                    aria-label="@tip"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    data-prism="@m.Ime"
+                                    title="@tip" />
+                        }
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <span class="fw-semibold">Virtuelni senzor — relativno ulegnuće</span>
+            <span class="d-flex flex-wrap align-items-center gap-2">
+                <span class="badge text-bg-danger">Limit |S_rel|: @limitSrel.ToString("F4", CultureInfo.InvariantCulture)</span>
+                <span class="small mb-0 text-body-secondary">@Model.SrelFormulaOpis</span>
+            </span>
+        </div>
+        <div class="card-body">
+            <p class="small text-muted mb-2">
+                @if (Model.JedanStubMost)
+                {
+                    <text>Relativno ulegnuće računa se iz @PrizmaUloga.Sredina i @PrizmaUloga.Vrh; poslednji poznati dZ po ulozi.</text>
+                }
+                else
+                {
+                    <text>Relativno ulegnuće koristi @PrizmaUloga.Sredina i oba vrha (@PrizmaUloga.Vrh1, @PrizmaUloga.Vrh2); poslednji poznati dZ po ulozi.</text>
+                }
+            </p>
+            <div style="height: 360px;">
+                <canvas id="srelChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener('load', function () {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip)
+                new bootstrap.Tooltip(el);
+        });
+
+        if (typeof Chart === 'undefined') return;
+
+        var canvas = document.getElementById('srelChart');
+        if (!canvas) return;
+
+        var labels = [
+            @for (var i = 0; i < Model.SrelSeries.Count; i++)
+            {
+                var pt = Model.SrelSeries[i];
+                @: '@pt.Dt.ToUniversalTime().ToString("HH:mm:ss", CultureInfo.InvariantCulture)',
+            }
+        ];
+
+        var srelChartTimestamps = [
+            @for (var i = 0; i < Model.SrelSeries.Count; i++)
+            {
+                var pt = Model.SrelSeries[i];
+                @: '@pt.Dt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) UTC',
+            }
+        ];
+
+        var values = [
+            @foreach (var p in Model.SrelSeries)
+            {
+                @: @p.Srel.ToString(CultureInfo.InvariantCulture),
+            }
+        ];
+
+        var srelLimit = @limitSrel.ToString(CultureInfo.InvariantCulture);
+        var yMinData = values.length ? Math.min.apply(null, values) : 0;
+        var yMaxData = values.length ? Math.max.apply(null, values) : srelLimit;
+        var ySuggestedMin = Math.min(0, yMinData, srelLimit) - Math.max(Math.abs(srelLimit) * 0.2, 0.005);
+        var ySuggestedMax = Math.max(yMaxData, srelLimit) + Math.max(Math.abs(srelLimit) * 0.2, 0.005);
+
+        var srelLimitLinePlugin = {
+            id: 'srelLimitLine',
+            afterDraw: function (chart) {
+                var scales = chart.scales;
+                var chartArea = chart.chartArea;
+                if (!chartArea || !scales.y) return;
+                var y = scales.y.getPixelForValue(srelLimit);
+                if (y < chartArea.top - 4 || y > chartArea.bottom + 4) return;
+                var ctx = chart.ctx;
+                ctx.save();
+                ctx.strokeStyle = '#dc3545';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 6]);
+                ctx.beginPath();
+                ctx.moveTo(chartArea.left, y);
+                ctx.lineTo(chartArea.right, y);
+                ctx.stroke();
+                ctx.restore();
+            }
+        };
+
+        var srelFillGradientPlugin = {
+            id: 'srelFillGradient',
+            beforeDatasetsDraw: function (chart) {
+                var ctx = chart.ctx;
+                var chartArea = chart.chartArea;
+                if (!chartArea) return;
+                var g = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                g.addColorStop(0, 'rgba(59, 130, 246, 0.02)');
+                g.addColorStop(0.55, 'rgba(59, 130, 246, 0.12)');
+                g.addColorStop(1, 'rgba(59, 130, 246, 0.3)');
+                chart.data.datasets[0].backgroundColor = g;
+            }
+        };
+
+        new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'S_rel',
+                    data: values,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointHoverRadius: 10,
+                    pointHitRadius: 14,
+                    pointHoverBorderWidth: 2,
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#3b82f6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            title: function (items) {
+                                var i = items[0].dataIndex;
+                                return (srelChartTimestamps[i] || items[0].label) || '';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Vreme (UTC)' },
+                        ticks: {
+                            maxRotation: 40,
+                            minRotation: 32,
+                            autoSkip: false,
+                            callback: function (val, index) {
+                                if (index % 2 !== 0) return '';
+                                return labels[index] || '';
+                            }
+                        }
+                    },
+                    y: {
+                        title: { display: true, text: 'S_rel' },
+                        suggestedMin: ySuggestedMin,
+                        suggestedMax: ySuggestedMax
+                    }
+                }
+            },
+            plugins: [srelFillGradientPlugin, srelLimitLinePlugin]
+        });
+    });
+</script>

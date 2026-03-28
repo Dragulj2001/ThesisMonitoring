@@ -1,0 +1,90 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Početna";
+}
+
+<div class="landing-page page-fade-in">
+    <div class="landing-grid container-fluid">
+        <div class="row align-items-center g-4">
+            <!-- Levo: stats -->
+            <div class="col-lg-3">
+                <section class="home-section home-stats text-start">
+                    <div class="home-stat mb-4">
+                        <div class="home-stat-number">@Model.PrismCount</div>
+                        <div class="home-stat-label">Aktivnih Prizmi</div>
+                    </div>
+                    <div class="home-stat mb-4">
+                        <div class="home-stat-number">@Model.MeasurementCount</div>
+                        <div class="home-stat-label">Zabeleženih Merenja</div>
+                    </div>
+                    <div class="home-stat">
+                        <div class="home-stat-number @Model.StatusCssClass">@Model.StatusText</div>
+                        <div class="home-stat-label">Trenutni Status</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Sredina: hero (slika + dugme) -->
+            <div class="col-lg-6">
+                <div class="landing-sandwich text-center">
+                    <div class="landing-hero-text mb-4">
+                        <h1 class="landing-hero-title">Monitoring Podataka</h1>
+                        <p class="landing-hero-subtitle">
+                            Centralizovan nadzor geodetskih merenja, analiza trendova i pravovremeno alarmiranje.
+                        </p>
+                    </div>
+
+                    <div class="landing-image landing-image-top mb-3">
+                        <img src="~/images/totalna_stanica.png" alt="Totalna stanica" class="img-fluid" />
+                    </div>
+
+                    <div class="landing-button-wrapper">
+                        <a class="btn btn-primary btn-lg landing-main-button" asp-controller="Data" asp-action="Analiza">
+                            Analiza Podataka
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desno: feature kartice -->
+            <div class="col-lg-3">
+                <section class="home-section home-features text-start">
+                    <div class="card shadow-sm home-feature-card mb-3">
+                        <div class="card-body">
+                            <div class="home-feature-icon mb-2">
+                                <i class="bi bi-broadcast-pin"></i>
+                            </div>
+                            <h6 class="card-title mb-1">Automatsko Merenje</h6>
+                            <p class="card-text small mb-0">
+                                Kontinuirano prikupljanje podataka bez ručne intervencije.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card shadow-sm home-feature-card mb-3">
+                        <div class="card-body">
+                            <div class="home-feature-icon mb-2">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <h6 class="card-title mb-1">Analiza Trendova</h6>
+                            <p class="card-text small mb-0">
+                                Praćenje pomeranja kroz vreme i detekcija trendova.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card shadow-sm home-feature-card">
+                        <div class="card-body">
+                            <div class="home-feature-icon mb-2">
+                                <i class="bi bi-bell-fill"></i>
+                            </div>
+                            <h6 class="card-title mb-1">Sistem Alarmiranja</h6>
+                            <p class="card-text small mb-0">
+                                Automatska obaveštenja pri prekoračenju pragova.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>

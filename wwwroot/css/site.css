@@ -1,0 +1,508 @@
+:root {
+  --site-bg: #f8fafc;
+  --site-navbar: #1e293b;
+  /* visina fiksiranog navbar-a (Bootstrap ~56px) — sadržaj počinje ispod njega */
+  --site-navbar-offset: 3.5rem;
+  --site-primary: #3b82f6;
+  --site-primary-hover: #2563eb;
+  --site-primary-rgb: 59, 130, 246;
+  --bs-primary: #3b82f6;
+  --bs-primary-rgb: 59, 130, 246;
+}
+
+html {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  /* height: 100% ostavlja „prazninu“ ispod kada je body flex + min-height — pokri ceo prozor */
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background-color: var(--site-bg);
+  scroll-padding-top: var(--site-navbar-offset);
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem var(--site-bg), 0 0 0 0.25rem rgba(var(--site-primary-rgb), 0.45);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  padding-top: var(--site-navbar-offset);
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--site-bg);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Glavni sadržaj do dna prozora — bez „praznine“ ispod koje deluje belo */
+main[role="main"] {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding-bottom: 0;
+  background-color: var(--site-bg);
+}
+
+.navbar-site {
+  background-color: var(--site-navbar) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.nav-link-site:hover,
+.nav-link-site:focus {
+  color: #fff !important;
+}
+
+.navbar-brand-site {
+  color: #fff !important;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--site-primary);
+  --bs-btn-border-color: var(--site-primary);
+  --bs-btn-hover-bg: var(--site-primary-hover);
+  --bs-btn-hover-border-color: var(--site-primary-hover);
+  --bs-btn-active-bg: var(--site-primary-hover);
+  --bs-btn-active-border-color: var(--site-primary-hover);
+  --bs-btn-disabled-bg: var(--site-primary);
+  --bs-btn-disabled-border-color: var(--site-primary);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--site-primary);
+  --bs-btn-border-color: var(--site-primary);
+  --bs-btn-hover-bg: var(--site-primary);
+  --bs-btn-hover-border-color: var(--site-primary);
+  --bs-btn-active-bg: var(--site-primary-hover);
+  --bs-btn-active-border-color: var(--site-primary-hover);
+}
+
+/* Dugmad: blag lift i senka na hover */
+.btn:not(:disabled):not(.disabled):not(.btn-link) {
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.btn:not(:disabled):not(.disabled):not(.btn-link):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14);
+}
+
+.btn:not(:disabled):not(.disabled):not(.btn-link):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+}
+
+.btn-link:not(:disabled):not(.disabled) {
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-link:not(:disabled):not(.disabled):hover {
+  opacity: 0.88;
+}
+
+body > .container {
+  flex: 1 0 auto;
+}
+
+/* Kartice: bez okvira, blago zaobljeno, suptilna senka, više paddinga */
+.card {
+  --bs-card-border-width: 0;
+  --bs-card-border-color: transparent;
+  --bs-card-border-radius: 12px;
+  --bs-card-spacer-y: 1.25rem;
+  --bs-card-spacer-x: 1.5rem;
+  --bs-card-cap-padding-y: 1rem;
+  --bs-card-cap-padding-x: 1.5rem;
+  border: none;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.card > .list-group {
+  border-radius: inherit;
+}
+
+/* Tabele: tamni, čisti header; više paddinga u ćelijama */
+.table > :not(caption) > * > * {
+  padding: 0.75rem 1.125rem;
+}
+
+.table > thead,
+.table > thead.table-light {
+  --bs-table-color: #f1f5f9;
+  --bs-table-bg: var(--site-navbar);
+  --bs-table-border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Bootstrap 5 boji ćelije i preko inset box-shadow-a; bez ovoga header može imati
+   svetao tekst (nasleđen) a belu podlogu — tekst postaje nečitak. */
+.table > thead > tr > th {
+  --bs-table-bg-type: transparent;
+  --bs-table-bg-state: transparent;
+  --bs-table-accent-bg: transparent;
+  color: #f1f5f9;
+  background-color: var(--site-navbar);
+  box-shadow: none;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-bottom-width: 0;
+  vertical-align: middle;
+}
+
+.table > tbody > tr > td {
+  vertical-align: middle;
+}
+
+/* Tabele: glatak prelaz na hover (i gde nema .table-hover) */
+.table > tbody > tr > * {
+  transition: box-shadow 0.22s ease, color 0.22s ease;
+}
+
+.table.table-hover {
+  --bs-table-hover-bg: rgba(59, 130, 246, 0.09);
+}
+
+.table:not(.table-hover) > tbody > tr:not(.alarm-row):hover > * {
+  --bs-table-bg-state: rgba(59, 130, 246, 0.07);
+}
+
+/* ALARM: pulsirajuća crvena (tabele, značke, SVG tačke, baner) */
+@keyframes alarm-row-pulse {
+  0%, 100% {
+    background-color: #f8d7da !important;
+    box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+  50% {
+    background-color: #f1aeb5 !important;
+    box-shadow: inset 0 0 28px rgba(220, 53, 69, 0.22);
+  }
+}
+
+tr.alarm-row > td {
+  animation: alarm-row-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes alarm-badge-pulse {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.45);
+  }
+  50% {
+    opacity: 0.88;
+    filter: brightness(1.22);
+    box-shadow: 0 0 0 10px rgba(220, 53, 69, 0.15);
+  }
+}
+
+.badge.alarm-pulse {
+  animation: alarm-badge-pulse 1.75s ease-in-out infinite;
+}
+
+@keyframes alarm-banner-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(176, 42, 55, 0.5);
+  }
+  50% {
+    opacity: 0.88;
+    box-shadow: 0 0 0 14px rgba(176, 42, 55, 0);
+  }
+}
+
+.srel-status-banner--danger {
+  animation: alarm-banner-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes alarm-marker-pulse {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(220, 53, 69, 0.9));
+  }
+  50% {
+    opacity: 0.7;
+    filter: drop-shadow(0 0 2px rgba(220, 53, 69, 0.35));
+  }
+}
+
+.bridge-marker--alarm {
+  animation: alarm-marker-pulse 1.75s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  tr.alarm-row > td,
+  .badge.alarm-pulse,
+  .srel-status-banner--danger,
+  .bridge-marker--alarm {
+    animation: none;
+  }
+
+  tr.alarm-row > td {
+    background-color: #f8d7da !important;
+  }
+
+  .btn:not(:disabled):not(.disabled) {
+    transition: none;
+    transform: none !important;
+  }
+
+  .btn:not(:disabled):not(.disabled):not(.btn-link):hover,
+  .btn:not(:disabled):not(.disabled):not(.btn-link):active {
+    box-shadow: none;
+  }
+
+  .btn-link:not(:disabled):not(.disabled):hover {
+    opacity: 1;
+  }
+
+  .table > tbody > tr > * {
+    transition: none;
+  }
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/* Landing: puna širina, minimalna visina do donje ivice (navbar ~3.5–4rem) */
+.landing-page {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 0 1.25rem;
+  box-sizing: border-box;
+  min-height: calc(100vh - 4rem);
+  min-height: calc(100dvh - 4rem);
+  background-color: var(--site-bg);
+}
+
+.landing-grid.container-fluid {
+  width: 100%;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.landing-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.35));
+  opacity: 0.9; /* gradient je taman, pa slika ostaje suptilna */
+  z-index: 0;
+}
+
+.landing-sandwich {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 80px 16px 40px;
+}
+
+.landing-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.landing-main-button {
+  padding: 30px 96px;
+  font-size: 2rem;
+  font-weight: 600;
+  border-radius: 999px;
+  margin-top: 32px;
+  transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease, border-color 140ms ease;
+  will-change: transform;
+}
+
+.landing-main-button:hover {
+  transform: translateY(-2px) scale(1.03);
+  background-color: var(--site-primary-hover);
+  border-color: var(--site-primary-hover);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.landing-main-button:active {
+  transform: translateY(0) scale(1.01);
+}
+
+.navbar-brand {
+  font-size: 1.8rem;
+  font-weight: 700;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+/* Hero typography */
+.landing-hero-title {
+  font-size: clamp(2.4rem, 3.4vw, 3.4rem);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+}
+
+.landing-hero-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* Features section */
+.home-section {
+  position: relative;
+  z-index: 1;
+}
+
+.home-feature-card {
+  border: none;
+  border-radius: 1rem;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.home-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+}
+
+.home-feature-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--site-primary-rgb), 0.12);
+  color: var(--site-primary);
+  font-size: 1.5rem;
+}
+
+/* Stats section */
+.home-stats {
+  background-color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  padding: 2rem 2.5rem; /* isti razmak levo i desno */
+  border-radius: 0.75rem;
+  margin: 0 auto;       /* centriraj beli prozor u koloni */
+}
+
+.home-stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.home-stat-label {
+  font-size: 0.95rem;
+  color: #6c757d;
+}
+
+/* Page fade-in */
+.page-fade-in {
+  animation: pageFadeIn 600ms ease-out;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Auth pages (Identity overrides) */
+.auth-page {
+  position: relative;
+  min-height: calc(100vh - 120px); /* prostor izmedju navbara i footera */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  overflow: hidden;
+}
+
+.auth-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.35)),
+    url("/images/most.png") center/cover no-repeat;
+  opacity: 0.45;
+  z-index: 0;
+}
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: min(460px, 100%);
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+}
+
+.auth-primary-btn {
+  background-color: var(--site-primary);
+  border-color: var(--site-primary);
+  transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+
+.auth-primary-btn:hover {
+  background-color: var(--site-primary-hover);
+  border-color: var(--site-primary-hover);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.auth-subtle-link {
+  color: var(--site-primary);
+  text-decoration: none;
+}
+
+.auth-subtle-link:hover {
+  color: var(--site-primary-hover);
+  text-decoration: underline;
+}

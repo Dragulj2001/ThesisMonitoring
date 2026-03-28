@@ -1,0 +1,197 @@
+@model IEnumerable<ThesisWebApp.Models.MerenjeViewModel>
+
+@{
+    ViewData["Title"] = "Merenja";
+}
+
+<style>
+    tr.table-warning > td {
+        background-color: #fff3cd !important;
+    }
+
+    tr.table-success > td {
+        background-color: #d1e7dd !important;
+    }
+
+    table.data-table thead th {
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background-color: var(--site-navbar, #1e293b);
+        color: #f1f5f9;
+        box-shadow: none;
+    }
+
+    table.data-table td.dt-cell {
+        white-space: nowrap;
+    }
+
+    .data-scroll-container {
+        max-height: calc(100vh - 280px);
+        overflow-y: auto;
+    }
+
+    .data-scroll-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .data-scroll-container::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.25);
+        border-radius: 3px;
+    }
+
+    .data-scroll-container {
+        scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+        scrollbar-width: thin;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        flex: 1 1 480px;
+        min-width: 480px;
+        max-width: 700px;
+    }
+
+    .search-input-wrapper .bi-search {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        pointer-events: none;
+        font-size: 1.25rem;
+    }
+
+    .search-input-wrapper input {
+        padding-left: 44px;
+        padding-right: 1rem;
+        font-size: 1.2rem;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .search-input-wrapper input::placeholder {
+        color: #6c757d;
+        opacity: 1;
+    }
+</style>
+
+<div class="container-fluid px-4 pt-4 pb-3">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <h2 class="mb-0">Merenja</h2>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="search-input-wrapper">
+                <i class="bi bi-search"></i>
+                <input type="text"
+                       id="dataSearchInput"
+                       class="form-control form-control-lg"
+                       placeholder="Pretraži po mostu, prizmi ili statusu..."
+                       autocomplete="off" />
+            </div>
+            <span class="badge text-bg-secondary" id="totalBadge">Total: @Model.Count()</span>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive data-scroll-container">
+                <table class="table table-striped table-hover align-middle mb-0 data-table table-wide">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3 col-most">Most</th>
+                            <th class="ps-2">Ime</th>
+                            <th>Datum / vreme (dt)</th>
+                            <th>Y</th>
+                            <th>X</th>
+                            <th>Z</th>
+                            <th>Dy</th>
+                            <th>Dx</th>
+                            <th>Dz</th>
+                            <th>D3d</th>
+                            <th>Status</th>
+                            <th>Y koord</th>
+                            <th>X koord</th>
+                            <th class="pe-3">Z koord</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        @foreach (var item in Model)
+                        {
+                            var lim = item.LimitAlarma;
+                            var d3d = item.D3d ?? 0;
+                            string rowClass;
+                            string badgeClass;
+                            string statusText;
+                            if (d3d > lim)
+                            {
+                                rowClass = "table-danger alarm-row";
+                                badgeClass = "text-bg-danger";
+                                statusText = "ALARM";
+                            }
+                            else if (d3d >= lim * 0.7 && d3d <= lim)
+                            {
+                                rowClass = "table-warning";
+                                badgeClass = "text-bg-warning";
+                                statusText = "WARN";
+                            }
+                            else
+                            {
+                                rowClass = "table-success";
+                                badgeClass = "text-bg-success";
+                                statusText = "OK";
+                            }
+                            var searchText = $"{item.NazivMosta} {item.Ime} {statusText}".ToLowerInvariant();
+                            <tr class="@rowClass" data-search="@searchText">
+                                <td class="ps-3 col-most">
+                                    <span class="badge rounded-pill text-bg-secondary fw-normal">@item.NazivMosta</span>
+                                </td>
+                                <td class="ps-2 fw-semibold">
+                                    <a href="@Url.Action("Analiza", "Data", new { mostId = item.MostId, prizmaIme = item.Ime })" class="text-primary text-decoration-none">@item.Ime</a>
+                                </td>
+                                <td class="dt-cell">@item.Dt.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@(item.Y?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.X?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Z?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Dy?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Dx?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Dz?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.D3d?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>
+                                    <span class="badge @badgeClass @(statusText == "ALARM" ? "alarm-pulse" : "")">@statusText</span>
+                                </td>
+                                <td>@(item.YKoord?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.XKoord?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td class="pe-3">@(item.ZKoord?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const searchInput = document.getElementById('dataSearchInput');
+        const tbody = document.getElementById('dataTableBody');
+        const totalBadge = document.getElementById('totalBadge');
+        const totalRows = tbody ? tbody.querySelectorAll('tr').length : 0;
+
+        if (searchInput && tbody) {
+            searchInput.addEventListener('input', function () {
+                const q = this.value.trim().toLowerCase();
+                const rows = tbody.querySelectorAll('tr');
+                let visible = 0;
+                rows.forEach(function (row) {
+                    const search = row.getAttribute('data-search') || '';
+                    const match = !q || search.includes(q);
+                    row.style.display = match ? '' : 'none';
+                    if (match) visible++;
+                });
+                totalBadge.textContent = q ? visible + ' / ' + totalRows : 'Total: ' + totalRows;
+            });
+        }
+    })();
+</script>

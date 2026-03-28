@@ -1,0 +1,47 @@
+@page
+@model ThesisWebApp.Areas.Identity.Pages.Account.LoginModel
+
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Log In";
+}
+
+<div class="auth-page">
+    <div class="auth-card p-0">
+        <div class="card-body p-4 p-md-5">
+            <h2 class="mb-4 text-center fw-bold">Prijava</h2>
+
+            <form method="post" class="needs-validation">
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label">Email</label>
+                    <input asp-for="Input.Email" class="form-control" />
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label">Lozinka</label>
+                    <input asp-for="Input.Password" class="form-control" type="password" />
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn auth-primary-btn w-100 py-3 fw-semibold">
+                    Log in
+                </button>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger mt-3 mb-0">
+                        @Model.ErrorMessage
+                    </div>
+                }
+
+                <div class="text-center mt-3">
+                    <a asp-page="/Account/Register" class="auth-subtle-link">
+                        Nemate nalog? Registrujte se
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

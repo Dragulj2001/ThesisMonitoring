@@ -1,0 +1,936 @@
+@model ThesisWebApp.Models.AnalizaViewModel
+@using Microsoft.AspNetCore.Authorization
+@using ThesisWebApp.Models
+
+@{
+    ViewData["Title"] = "Analiza";
+    var tipTrenutnogMosta = Model.Mostovi.FirstOrDefault(m => m.Id == Model.SelectedMostId)?.Tip ?? MostTip.DvaStuba;
+    var hasMostovi = Model.Mostovi.Count > 0;
+    var hasPrizme = hasMostovi && Model.Prizme.Count > 0;
+    var hasSelection = !string.IsNullOrWhiteSpace(Model.SelectedIme);
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div class="container-fluid px-2 pb-3">
+    @Html.AntiForgeryToken()
+    @if (isAdmin || hasMostovi)
+    {
+        <div class="analiza-most-bar rounded-top px-3 py-2 mb-3 border" style="background-color: #dee2e6; border-color: #ced4da !important;">
+            <div class="d-flex flex-wrap align-items-center gap-3 w-100">
+                @if (hasMostovi)
+                {
+                    <form method="get" asp-controller="Data" asp-action="Analiza" id="bridgeSelectForm" class="d-flex flex-wrap align-items-center gap-2 mb-0 flex-grow-1">
+                        <label for="mostIdSelect" class="form-label mb-0 fw-semibold text-secondary">Izaberi most</label>
+                        <select id="mostIdSelect" name="mostId" class="form-select form-select-sm" style="min-width: 200px; max-width: 360px;" onchange="this.form.submit()">
+                            @foreach (var m in Model.Mostovi)
+                            {
+                                if (Model.SelectedMostId == m.Id)
+                                {
+                                    <option value="@m.Id" selected>@m.Naziv</option>
+                                }
+                                else
+                                {
+                                    <option value="@m.Id">@m.Naziv</option>
+                                }
+                            }
+                        </select>
+                    </form>
+                }
+                else
+                {
+                    <p class="mb-0 text-secondary small">Još uvek nema unetih mostova.</p>
+                }
+                @if (isAdmin)
+                {
+                    <div class="d-flex align-items-center gap-2 ms-auto">
+                        <button type="button" class="btn btn-success btn-sm px-2" title="Dodaj novi most" data-bs-toggle="modal" data-bs-target="#addBridgeModal">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                        @if (hasMostovi && Model.SelectedMostId.HasValue)
+                        {
+                            <button type="button" class="btn btn-danger btn-sm px-2" id="btnDeleteBridge" title="Obriši izabrani most">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="modal fade" id="addBridgeModal" tabindex="-1" aria-labelledby="addBridgeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addBridgeModalLabel">Dodaj novi most</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                    </div>
+                    <form asp-controller="Data" asp-action="CreateBridge" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="bridgeNaziv" class="form-label">Naziv</label>
+                                <input type="text" class="form-control" id="bridgeNaziv" name="naziv" required maxlength="200" />
+                            </div>
+                            <div class="mb-0">
+                                <label for="bridgeTip" class="form-label">Tip</label>
+                                <select class="form-select" id="bridgeTip" name="tip" required>
+                                    <option value="@MostTip.DvaStuba" selected>@MostTip.DvaStuba</option>
+                                    <option value="@MostTip.JedanStub">@MostTip.JedanStub</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Otkaži</button>
+                            <button type="submit" class="btn btn-success"><i class="bi bi-plus-lg"></i> Dodaj most</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    @if (TempData["ImportMessage"] is string importMsg)
+    {
+        var ok = TempData["ImportSuccess"] is bool b && b;
+        <div class="alert @(ok ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+            @importMsg
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zatvori"></button>
+        </div>
+    }
+    <style>
+        /* Make the table scroll area feel consistent with Data page */
+        .data-scroll-container {
+            max-height: calc(100vh - 320px);
+            overflow-y: auto;
+        }
+
+        .data-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background-color: var(--site-navbar, #1e293b);
+            color: #f1f5f9;
+            box-shadow: none;
+            white-space: nowrap;
+        }
+
+        .data-table th,
+        .data-table td {
+            white-space: nowrap; /* keep numbers on one line */
+        }
+
+        .data-scroll-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .data-scroll-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 3px;
+        }
+
+        .data-scroll-container {
+            width: 100%;
+        }
+
+        table.data-table {
+            width: 100%;
+        }
+    </style>
+
+    @if (!hasMostovi)
+    {
+        <div class="alert alert-warning" role="alert">
+            @if (isAdmin)
+            {
+                <span>Nema definisanih mostova. Koristite zeleno dugme <strong>+</strong> u sivoj traci da dodate prvi most.</span>
+            }
+            else
+            {
+                <span>Nema definisanih mostova. Obratite se administratoru.</span>
+            }
+        </div>
+    }
+    else if (!hasPrizme)
+    {
+        <div class="alert alert-warning" role="alert">
+            Za izabrani most nema prizmi. Dodajte prizmu za ovaj most da biste videli analizu.
+        </div>
+    }
+
+    @if (hasMostovi)
+    {
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="mb-0">Pojedinačna Analiza</h2>
+        <span class="badge text-bg-secondary">
+            @if (hasSelection)
+            {
+                @("Prizma: " + Model.SelectedIme)
+            }
+            else
+            {
+                @("Izaberite prizmu")
+            }
+        </span>
+    </div>
+
+        <div class="card shadow-sm mb-3 bg-white">
+        <div class="card-body">
+            <form id="prismSelectForm" method="get" action="/Data/Analiza">
+                @if (Model.SelectedMostId.HasValue)
+                {
+                    <input type="hidden" name="mostId" value="@Model.SelectedMostId.Value" />
+                }
+                <input type="hidden" name="prizmaIme" id="selectedIme" value="@Model.SelectedIme" />
+
+                <div class="d-flex flex-wrap align-items-center gap-2 w-100">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="dropdown">
+                            <button
+                                class="btn btn-outline-primary dropdown-toggle"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                @(string.IsNullOrWhiteSpace(Model.SelectedIme) ? "Izaberi prizmu" : Model.SelectedIme)
+                            </button>
+
+                            <ul class="dropdown-menu">
+                                @foreach (var p in Model.Prizme)
+                                {
+                                    <li>
+                                        <a class="dropdown-item@(p == Model.SelectedIme ? " active" : "")" href="#"
+                                           data-ime="@p">
+                                            @p
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+
+                        @if (isAdmin)
+                        {
+                            <button type="button" class="btn btn-primary" title="Novo merenje" data-bs-toggle="modal" data-bs-target="#newMeasurementModal">
+                                <i class="bi bi-rulers"></i> Novo merenje
+                            </button>
+                            <button type="button" class="btn btn-warning" title="Izmeni prizmu" data-bs-toggle="modal" data-bs-target="#editPrismModal" @(hasSelection ? "" : "disabled")>
+                                <i class="bi bi-pencil"></i> Izmeni prizmu
+                            </button>
+                            <button type="button" class="btn btn-success" title="Dodaj novu prizmu" data-bs-toggle="modal" data-bs-target="#addPrismModal">
+                                <i class="bi bi-plus-lg"></i> Dodaj novu
+                            </button>
+                            <button type="button" class="btn btn-danger" id="btnDeletePrism" title="Obriši prizmu" @(hasSelection ? "" : "disabled")>
+                                <i class="bi bi-trash"></i> Obriši
+                            </button>
+                            <button type="button" class="btn btn-dark" title="Postavke" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                <i class="bi bi-gear"></i> Postavke
+                            </button>
+                        }
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
+                        <a href="@(hasSelection ? Url.Action("ExportToExcel", "Data", new { ime = Model.SelectedIme, mostId = Model.SelectedMostId }) : "#")"
+                           class="btn btn-outline-secondary @(hasSelection ? "" : "disabled")"
+                           title="Preuzmi Excel"
+                           @(hasSelection ? "" : "aria-disabled=\"true\"")>
+                            <i class="bi bi-file-earmark-spreadsheet"></i> Preuzmi Excel
+                        </a>
+
+                        @if (isAdmin)
+                        {
+                            <button type="button" class="btn btn-outline-secondary" title="Importuj Excel" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                                <i class="bi bi-upload"></i> Importuj Excel
+                            </button>
+                        }
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    }
+
+    <!-- Modal: Izmeni prizmu -->
+    <div class="modal fade" id="editPrismModal" tabindex="-1" aria-labelledby="editPrismModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPrismModalLabel">Izmeni prizmu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <form asp-controller="Data" asp-action="EditPrism" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="originalIme" value="@Model.SelectedIme" />
+                    @if (Model.SelectedMostId.HasValue)
+                    {
+                        <input type="hidden" name="expectedMostId" value="@Model.SelectedMostId.Value" />
+                    }
+                    <div class="modal-body">
+                        @{
+                            var ulogeZaEdit = tipTrenutnogMosta == MostTip.JedanStub ? PrizmaUloga.ZaJedanStub : PrizmaUloga.ZaDvaStuba;
+                            var ulogaEditVrednost = !string.IsNullOrWhiteSpace(Model.SelectedUloga) && ulogeZaEdit.Contains(Model.SelectedUloga)
+                                ? Model.SelectedUloga
+                                : ulogeZaEdit[0];
+                        }
+                        <div class="mb-3">
+                            <label for="editPrismIme" class="form-label">Ime</label>
+                            <input type="text" class="form-control" id="editPrismIme" name="ime" required
+                                   value="@Model.SelectedIme" @(hasSelection ? "" : "disabled") />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPrismUloga" class="form-label">Uloga u konstrukciji</label>
+                            <select class="form-select" id="editPrismUloga" name="uloga" required @(hasSelection ? "" : "disabled")>
+                                @foreach (var op in ulogeZaEdit)
+                                {
+                                    if (op == ulogaEditVrednost)
+                                    {
+                                        <option value="@op" selected>@op</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@op">@op</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editYKoord" class="form-label">Y_koord</label>
+                            <input type="number" step="any" class="form-control" id="editYKoord" name="yKoord"
+                                   value="@Model.YKoord?.ToString(System.Globalization.CultureInfo.InvariantCulture)" @(hasSelection ? "" : "disabled") />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editXKoord" class="form-label">X_koord</label>
+                            <input type="number" step="any" class="form-control" id="editXKoord" name="xKoord"
+                                   value="@Model.XKoord?.ToString(System.Globalization.CultureInfo.InvariantCulture)" @(hasSelection ? "" : "disabled") />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editZKoord" class="form-label">Z_koord</label>
+                            <input type="number" step="any" class="form-control" id="editZKoord" name="zKoord"
+                                   value="@Model.ZKoord?.ToString(System.Globalization.CultureInfo.InvariantCulture)" @(hasSelection ? "" : "disabled") />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Otkaži</button>
+                        <button type="submit" class="btn btn-warning" @(hasSelection ? "" : "disabled")><i class="bi bi-pencil"></i> Sačuvaj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Dodaj novu prizmu -->
+    <div class="modal fade" id="addPrismModal" tabindex="-1" aria-labelledby="addPrismModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPrismModalLabel">Dodaj novu prizmu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <form id="addPrismForm">
+                    <div class="modal-body">
+                        @if (Model.SelectedMostId.HasValue)
+                        {
+                            <input type="hidden" id="addMostId" name="mostId" value="@Model.SelectedMostId.Value" />
+                        }
+                        <div class="mb-3">
+                            <label for="addIme" class="form-label">Ime</label>
+                            <input type="text" class="form-control" id="addIme" name="ime" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="addPrismUloga" class="form-label">Uloga u konstrukciji</label>
+                            <select class="form-select" id="addPrismUloga" name="uloga" required>
+                                @if (tipTrenutnogMosta == MostTip.JedanStub)
+                                {
+                                    foreach (var op in PrizmaUloga.ZaJedanStub)
+                                    {
+                                        <option value="@op">@op</option>
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (var op in PrizmaUloga.ZaDvaStuba)
+                                    {
+                                        <option value="@op">@op</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addYKoord" class="form-label">Y_koord</label>
+                            <input type="number" step="any" class="form-control" id="addYKoord" name="yKoord" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="addXKoord" class="form-label">X_koord</label>
+                            <input type="number" step="any" class="form-control" id="addXKoord" name="xKoord" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="addZKoord" class="form-label">Z_koord</label>
+                            <input type="number" step="any" class="form-control" id="addZKoord" name="zKoord" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Otkaži</button>
+                        <button type="submit" class="btn btn-success"><i class="bi bi-plus-lg"></i> Dodaj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Import Excel -->
+    <div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importExcelModalLabel">Import merenja iz Excela</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <form asp-controller="Data" asp-action="ImportExcel" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnIme" value="@Model.SelectedIme" />
+                    <div class="modal-body">
+                        <p class="small text-muted mb-2">
+                            Uvoz se vezuje za <strong>jedan most</strong>. Samo redovi čije se ime prizme poklapa sa prizmom na tom mostu biće uvezeni; ostali će biti preskočeni i navedeni u izveštaju.
+                        </p>
+                        <div class="mb-3">
+                            <label for="importMostId" class="form-label">Most za uvoz</label>
+                            <select class="form-select" id="importMostId" name="mostId" required>
+                                @foreach (var m in Model.Mostovi)
+                                {
+                                    if (Model.SelectedMostId == m.Id)
+                                    {
+                                        <option value="@m.Id" selected>@m.Naziv</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@m.Id">@m.Naziv</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <p class="small text-muted mb-2">Očekivane kolone u prvom redu: <strong>Ime</strong>, <strong>Datum</strong>, <strong>X</strong>, <strong>Y</strong>, <strong>Z</strong>.</p>
+                        <div class="mb-3">
+                            <label for="importExcelFile" class="form-label">Izaberi .xlsx fajl</label>
+                            <input type="file" class="form-control" id="importExcelFile" name="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Otkaži</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Uvezi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Novo merenje -->
+    <div class="modal fade" id="newMeasurementModal" tabindex="-1" aria-labelledby="newMeasurementModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newMeasurementModalLabel">Novo merenje</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <form id="newMeasurementForm">
+                    <div class="modal-body">
+                        @if (Model.SelectedMostId.HasValue)
+                        {
+                            <input type="hidden" name="mostId" value="@Model.SelectedMostId.Value" />
+                        }
+                        <div class="mb-3">
+                            <label for="measurementIme" class="form-label">Prizma</label>
+                            <select class="form-select" id="measurementIme" name="ime" required>
+                                <option value="">Izaberi prizmu</option>
+                                @foreach (var p in Model.Prizme)
+                                {
+                                    if (p == Model.SelectedIme)
+                                    {
+                                        <option value="@p" selected>@p</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@p">@p</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="measurementX" class="form-label">Trenutni X</label>
+                            <input type="number" step="any" class="form-control" id="measurementX" name="trenutniX" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="measurementY" class="form-label">Trenutni Y</label>
+                            <input type="number" step="any" class="form-control" id="measurementY" name="trenutniY" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="measurementZ" class="form-label">Trenutni Z</label>
+                            <input type="number" step="any" class="form-control" id="measurementZ" name="trenutniZ" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="measurementDt" class="form-label">Datum i vreme</label>
+                            <input type="datetime-local" class="form-control" id="measurementDt" name="dt" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Otkaži</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-rulers"></i> Sačuvaj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Postavke (Granica Alarma) -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Postavke</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+                </div>
+                <form id="settingsForm">
+                    <div class="modal-body">
+                        @if (Model.SelectedMostId is { } settingsMostId)
+                        {
+                            <input type="hidden" name="mostId" value="@settingsMostId" />
+                        }
+                        <div class="mb-3">
+                            <label for="alarmLimitInput" class="form-label">Granica alarma (d3d)</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="alarmLimitInput" name="alarmLimit" value="@Model.AlarmLimit.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="limitSrelInput" class="form-label">Limit virtuelnog senzora (|S_rel|)</label>
+                            <input type="number" step="0.001" min="0" class="form-control" id="limitSrelInput" name="limitSrel" value="@Model.LimitSrel.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                            <div class="form-text">Podrazumevano 0.02 (npr. 20 mm ako su jedinice u metrima).</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Otkaži</button>
+                        <button type="submit" class="btn btn-primary">Sačuvaj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @if (hasSelection)
+    {
+        <div class="card shadow-sm mb-3">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span>Trend d3d (dt → d3d)</span>
+                <span class="badge text-bg-secondary">Alarm limit: @Model.AlarmLimit.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)</span>
+            </div>
+            <div class="card-body">
+                <div style="height: 320px;">
+                    <canvas id="d3dTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-header">
+                Komponente pomeranja (dX, dY, dZ)
+            </div>
+            <div class="card-body">
+                <div style="height: 320px;">
+                    <canvas id="vectorChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+            <div class="row g-2">
+            <div class="col-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        Fiksne koordinate
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2 small text-muted">
+                            Prizma: <strong class="text-body">@Model.SelectedIme</strong>
+                            @if (!string.IsNullOrWhiteSpace(Model.SelectedUloga))
+                            {
+                                <span> · Uloga: <strong class="text-body">@Model.SelectedUloga</strong></span>
+                            }
+                        </div>
+                        <div class="mb-2">
+                            <strong>Y</strong>: @Model.YKoord
+                        </div>
+                        <div class="mb-2">
+                            <strong>X</strong>: @Model.XKoord
+                        </div>
+                        <div class="mb-0">
+                            <strong>Z</strong>: @Model.ZKoord
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span>Istorija merenja (novije prvo)</span>
+                        <span class="badge text-bg-secondary">@Model.Measurements.Count</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive data-scroll-container">
+                            <table class="table table-striped table-hover align-middle mb-0 data-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Datum / vreme</th>
+                                        <th>Y</th>
+                                        <th>X</th>
+                                        <th>Z</th>
+                                        <th>Dy</th>
+                                        <th>Dx</th>
+                                        <th>Dz</th>
+                                        <th>D3d</th>
+                                        <th>Status</th>
+                                        <th>Akcije</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var m in Model.Measurements)
+                                    {
+                                        var limit = Model.AlarmLimit;
+                                        var d3d = m.D3d ?? 0;
+                                        string rowClass;
+                                        string badgeClass;
+                                        string statusText;
+                                        if (d3d > limit)
+                                        {
+                                            rowClass = "table-danger alarm-row";
+                                            badgeClass = "text-bg-danger";
+                                            statusText = "ALARM";
+                                        }
+                                        else if (d3d >= limit * 0.7 && d3d <= limit)
+                                        {
+                                            rowClass = "table-warning";
+                                            badgeClass = "text-bg-warning";
+                                            statusText = "WARN";
+                                        }
+                                        else
+                                        {
+                                            rowClass = "table-success";
+                                            badgeClass = "text-bg-success";
+                                            statusText = "OK";
+                                        }
+                                        <tr class="@rowClass">
+                                            <td>@m.Dt.ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>@m.Y</td>
+                                            <td>@m.X</td>
+                                            <td>@m.Z</td>
+                                            <td>@m.Dy</td>
+                                            <td>@m.Dx</td>
+                                            <td>@m.Dz</td>
+                                            <td>@m.D3d</td>
+                                            <td>
+                                                <span class="badge @badgeClass @(statusText == "ALARM" ? "alarm-pulse" : "")">@statusText</span>
+                                            </td>
+                                            <td>
+                                                @if (isAdmin)
+                                                {
+                                                    <form method="post" action="@Url.Action("DeleteMeasurement", "Data")" class="d-inline" onsubmit="return confirm('Da li ste sigurni da želite da obrišete ovo merenje od @m.Dt.ToString("yyyy-MM-dd HH:mm")?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="ime" value="@Model.SelectedIme" />
+                                                        <input type="hidden" name="dt" value="@m.Dt.ToString("o")" />
+                                                        @if (Model.SelectedMostId.HasValue)
+                                                        {
+                                                            <input type="hidden" name="expectedMostId" value="@Model.SelectedMostId.Value" />
+                                                        }
+                                                        <button type="submit" class="btn btn-danger btn-sm" title="Obriši merenje">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    (function () {
+        const form = document.getElementById('prismSelectForm');
+        const hidden = document.getElementById('selectedIme');
+        const dropdown = form?.querySelector('.dropdown-menu');
+        if (!form || !hidden || !dropdown) return;
+
+        dropdown.addEventListener('click', function (e) {
+            const link = e.target.closest('a[data-ime]');
+            if (!link) return;
+            e.preventDefault();
+
+            hidden.value = link.getAttribute('data-ime') || '';
+            form.submit();
+        });
+    })();
+
+    (function () {
+        function getToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        }
+        function appendToken(fd) {
+            fd.append('__RequestVerificationToken', getToken());
+        }
+
+        const addForm = document.getElementById('addPrismForm');
+        if (addForm) {
+            addForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const fd = new FormData(addForm);
+                appendToken(fd);
+                const res = await fetch('/Data/AddPrism', {
+                    method: 'POST',
+                    body: fd
+                });
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                    const text = await res.text();
+                    alert(text || 'Greška pri dodavanju.');
+                }
+            });
+        }
+
+        const newMeasurementModal = document.getElementById('newMeasurementModal');
+        const newMeasurementForm = document.getElementById('newMeasurementForm');
+        const measurementDtInput = document.getElementById('measurementDt');
+        if (newMeasurementModal && measurementDtInput) {
+            newMeasurementModal.addEventListener('shown.bs.modal', function () {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                measurementDtInput.value = now.toISOString().slice(0, 16);
+            });
+        }
+        if (newMeasurementForm) {
+            newMeasurementForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const fd = new FormData(newMeasurementForm);
+                appendToken(fd);
+                const res = await fetch('/Data/AddMerenje', {
+                    method: 'POST',
+                    body: fd
+                });
+                if (res.ok) {
+                    const ime = fd.get('ime');
+                    const midEl = document.querySelector('#prismSelectForm input[name="mostId"]');
+                    const mid = midEl && midEl.value ? '&mostId=' + encodeURIComponent(midEl.value) : '';
+                    window.location.href = ime
+                        ? '/Data/Analiza?prizmaIme=' + encodeURIComponent(ime) + mid
+                        : '/Data/Analiza' + (mid ? mid.replace('&', '?') : '');
+                } else {
+                    const text = await res.text();
+                    alert(text || 'Greška pri čuvanju merenja.');
+                }
+            });
+        }
+
+        const btnDelete = document.getElementById('btnDeletePrism');
+        if (btnDelete) {
+            btnDelete.addEventListener('click', async function () {
+                const ime = document.getElementById('selectedIme')?.value;
+                if (!ime) return;
+                if (!confirm('Da li ste sigurni da želite da obrišete prizmu "' + ime + '" i sva povezana merenja?')) return;
+                const fd = new FormData();
+                fd.append('ime', ime);
+                const expMid = document.querySelector('#prismSelectForm input[name="mostId"]')?.value;
+                if (expMid) fd.append('expectedMostId', expMid);
+                appendToken(fd);
+                const res = await fetch('/Data/DeletePrism', {
+                    method: 'POST',
+                    body: fd
+                });
+                if (res.ok) {
+                    const midEl = document.querySelector('#prismSelectForm input[name="mostId"]');
+                    const mid = midEl && midEl.value ? '?mostId=' + encodeURIComponent(midEl.value) : '';
+                    window.location.href = '/Data/Analiza' + mid;
+                } else {
+                    const text = await res.text();
+                    alert(text || 'Greška pri brisanju.');
+                }
+            });
+        }
+
+        const btnDeleteBridge = document.getElementById('btnDeleteBridge');
+        if (btnDeleteBridge) {
+            btnDeleteBridge.addEventListener('click', function () {
+                const sel = document.getElementById('mostIdSelect');
+                if (!sel || !sel.value) return;
+                if (!confirm('Da li ste sigurni da želite da obrišete ovaj most? Biće obrisana i sva merenja i sve prizme povezane sa njim. Ova radnja je nepovratna.')) return;
+                const f = document.createElement('form');
+                f.method = 'POST';
+                f.action = '@Url.Action("DeleteBridge", "Data")';
+                const inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'mostId';
+                inp.value = sel.value;
+                f.appendChild(inp);
+                const tok = document.createElement('input');
+                tok.type = 'hidden';
+                tok.name = '__RequestVerificationToken';
+                tok.value = getToken();
+                f.appendChild(tok);
+                document.body.appendChild(f);
+                f.submit();
+            });
+        }
+
+        const settingsForm = document.getElementById('settingsForm');
+        if (settingsForm) {
+            settingsForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const fd = new FormData(settingsForm);
+                appendToken(fd);
+                const res = await fetch('/Data/UpdatePostavkeLimits', {
+                    method: 'POST',
+                    body: fd
+                });
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                    const text = await res.text();
+                    alert(text || 'Greška pri čuvanju.');
+                }
+            });
+        }
+    })();
+</script>
+
+@if (hasSelection)
+{
+    <script>
+        (function () {
+            if (typeof Chart === 'undefined') return;
+
+            const alarmLimit = @(((double)(ViewBag.Limit ?? 0.15)).ToString(System.Globalization.CultureInfo.InvariantCulture));
+            const points = [
+                @for (int i = Model.Measurements.Count - 1; i >= 0; i--)
+                {
+                    var m = Model.Measurements[i];
+                    var dt = m.Dt.ToString("yyyy-MM-ddTHH:mm:ss");
+                    var d3dVal = m.D3d.HasValue ? m.D3d.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null";
+                    var dxVal = m.Dx.HasValue ? m.Dx.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null";
+                    var dyVal = m.Dy.HasValue ? m.Dy.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null";
+                    var dzVal = m.Dz.HasValue ? m.Dz.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null";
+                    @: { dt: '@dt', d3d: @d3dVal, dx: @dxVal, dy: @dyVal, dz: @dzVal },
+                }
+            ];
+
+            const labels = points.map(p => p.dt);
+
+            // d3d chart
+            const d3dCanvas = document.getElementById('d3dTrendChart');
+            if (d3dCanvas) {
+                const alarmLinePlugin = {
+                    id: 'alarmLine',
+                    afterDraw(chart) {
+                        const { ctx, chartArea, scales } = chart;
+                        if (!chartArea) return;
+                        const y = scales.y.getPixelForValue(alarmLimit);
+                        ctx.save();
+                        ctx.strokeStyle = '#dc3545';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([6, 6]);
+                        ctx.beginPath();
+                        ctx.moveTo(chartArea.left, y);
+                        ctx.lineTo(chartArea.right, y);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                };
+
+                const d3dFillGradientPlugin = {
+                    id: 'd3dFillGradient',
+                    beforeDatasetsDraw(chart) {
+                        const { ctx, chartArea } = chart;
+                        if (!chartArea) return;
+                        const g = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                        g.addColorStop(0, 'rgba(59, 130, 246, 0.02)');
+                        g.addColorStop(0.55, 'rgba(59, 130, 246, 0.12)');
+                        g.addColorStop(1, 'rgba(59, 130, 246, 0.32)');
+                        chart.data.datasets[0].backgroundColor = g;
+                    }
+                };
+
+                const pointInteraction = {
+                    radius: 3,
+                    hoverRadius: 10,
+                    hitRadius: 14,
+                    hoverBorderWidth: 2,
+                    hoverBackgroundColor: '#fff',
+                    hoverBorderColor: '#3b82f6'
+                };
+
+                new Chart(d3dCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'd3d',
+                            data: points.map(p => p.d3d),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: pointInteraction.radius,
+                            pointHoverRadius: pointInteraction.hoverRadius,
+                            pointHitRadius: pointInteraction.hitRadius,
+                            pointHoverBorderWidth: pointInteraction.hoverBorderWidth,
+                            pointHoverBackgroundColor: pointInteraction.hoverBackgroundColor,
+                            pointHoverBorderColor: pointInteraction.hoverBorderColor
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { title: { display: true, text: 'dt' }, ticks: { maxRotation: 0, minRotation: 0, autoSkip: true } },
+                            y: { title: { display: true, text: 'd3d' } }
+                        }
+                    },
+                    plugins: [d3dFillGradientPlugin, alarmLinePlugin]
+                });
+            }
+
+            // Vector chart (dX, dY, dZ)
+            const vectorCanvas = document.getElementById('vectorChart');
+            if (vectorCanvas) {
+                new Chart(vectorCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'dX', data: points.map(p => p.dx), borderColor: '#dc3545', backgroundColor: 'rgba(220, 53, 69, 0.1)', borderWidth: 2, fill: false, tension: 0.4, pointRadius: 3, pointHoverRadius: 10, pointHitRadius: 14, pointHoverBorderWidth: 2, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#dc3545' },
+                            { label: 'dY', data: points.map(p => p.dy), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, fill: false, tension: 0.4, pointRadius: 3, pointHoverRadius: 10, pointHitRadius: 14, pointHoverBorderWidth: 2, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#3b82f6' },
+                            { label: 'dZ', data: points.map(p => p.dz), borderColor: '#198754', backgroundColor: 'rgba(25, 135, 84, 0.1)', borderWidth: 2, fill: false, tension: 0.4, pointRadius: 3, pointHoverRadius: 10, pointHitRadius: 14, pointHoverBorderWidth: 2, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#198754' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        plugins: {
+                            legend: { display: true, position: 'top' }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'dt' }, ticks: { maxRotation: 0, minRotation: 0, autoSkip: true } },
+                            y: { title: { display: true, text: 'dX, dY, dZ' } }
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
+}
+
