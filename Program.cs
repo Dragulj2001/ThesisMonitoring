@@ -53,14 +53,25 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
-   
 
-using (var scope = app.Services.CreateScope())
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(defaultConnection))
 {
-    var services = scope.ServiceProvider;
-    await services.GetRequiredService<ApplicationIdentityDbContext>().Database.MigrateAsync();
-    await services.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
-    await IdentitySeeder.SeedAsync(services);
+    app.Logger.LogError(
+        "DefaultConnection is null or empty — skipping EF Core migrations and identity seed. " +
+        "Configure a valid PostgreSQL connection string (e.g. on Render set environment variable ConnectionStrings__DefaultConnection). " +
+        "Expected format: Host=...;Port=5432;Database=...;Username=...;Password=...;SSL Mode=Require;Trust Server Certificate=true");
+}
+else
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        await services.GetRequiredService<ApplicationIdentityDbContext>().Database.MigrateAsync();
+        await services.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+        await IdentitySeeder.SeedAsync(services);
+    }
 }
 
 app.Run();
