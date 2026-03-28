@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace ThesisWebApp.Migrations.ApplicationIdentityDb
+namespace ThesisWebApp.Migrations.ApplicationDb
 {
     /// <inheritdoc />
-    public partial class NewInitialIdentity : Migration
+    public partial class FinalRenderSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

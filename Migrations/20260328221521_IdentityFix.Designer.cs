@@ -9,18 +9,18 @@ using ThesisWebApp.Data;
 
 #nullable disable
 
-namespace ThesisWebApp.Migrations
+namespace ThesisWebApp.Migrations.ApplicationIdentityDb
 {
     [DbContext(typeof(ApplicationIdentityDbContext))]
-    [Migration("20260318181616_InitialIdentity")]
-    partial class InitialIdentity
+    [Migration("20260328221521_IdentityFix")]
+    partial class IdentityFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);

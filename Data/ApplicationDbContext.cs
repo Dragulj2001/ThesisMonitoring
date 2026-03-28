@@ -43,7 +43,8 @@ public class ApplicationDbContext : DbContext
             .HasOne(m => m.Lokacija)
             .WithMany(l => l.Merenja)
             .HasForeignKey(m => m.Ime)
-            .HasPrincipalKey(l => l.Ime);
+            .HasPrincipalKey(l => l.Ime)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 

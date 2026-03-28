@@ -168,7 +168,7 @@ namespace ThesisWebApp.Migrations
                     b.HasOne("ThesisWebApp.Models.LokacijaPredef", "Lokacija")
                         .WithMany("Merenja")
                         .HasForeignKey("Ime")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Lokacija");

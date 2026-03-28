@@ -9,11 +9,11 @@ using ThesisWebApp.Data;
 
 #nullable disable
 
-namespace ThesisWebApp.Migrations.ApplicationIdentityDb
+namespace ThesisWebApp.Migrations
 {
     [DbContext(typeof(ApplicationIdentityDbContext))]
-    [Migration("20260328215830_NewInitialIdentity")]
-    partial class NewInitialIdentity
+    [Migration("20260328221256_InitialIdentity")]
+    partial class InitialIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

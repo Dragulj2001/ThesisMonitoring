@@ -12,15 +12,15 @@ using ThesisWebApp.Data;
 namespace ThesisWebApp.Migrations.ApplicationDb
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260328174914_AddMostoviTable")]
-    partial class AddMostoviTable
+    [Migration("20260328221509_FinalRenderSchema")]
+    partial class FinalRenderSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -30,6 +30,15 @@ namespace ThesisWebApp.Migrations.ApplicationDb
                     b.Property<string>("Ime")
                         .HasColumnType("text")
                         .HasColumnName("ime");
+
+                    b.Property<int>("MostId")
+                        .HasColumnType("integer")
+                        .HasColumnName("most_id");
+
+                    b.Property<string>("Uloga")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("uloga");
 
                     b.Property<double?>("XKoord")
                         .HasColumnType("double precision")
@@ -44,6 +53,8 @@ namespace ThesisWebApp.Migrations.ApplicationDb
                         .HasColumnName("z_koord");
 
                     b.HasKey("Ime");
+
+                    b.HasIndex("MostId");
 
                     b.ToTable("lokacije_predef");
                 });
@@ -96,6 +107,38 @@ namespace ThesisWebApp.Migrations.ApplicationDb
                     b.ToTable("merenja");
                 });
 
+            modelBuilder.Entity("ThesisWebApp.Models.Most", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("LimitAlarma")
+                        .HasColumnType("double precision")
+                        .HasColumnName("limit_alarma");
+
+                    b.Property<double>("LimitSrel")
+                        .HasColumnType("double precision")
+                        .HasColumnName("limit_srel");
+
+                    b.Property<string>("Naziv")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("naziv");
+
+                    b.Property<string>("Tip")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tip");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("mostovi");
+                });
+
             modelBuilder.Entity("ThesisWebApp.Models.Postavke", b =>
                 {
                     b.Property<string>("Kljuc")
@@ -112,12 +155,23 @@ namespace ThesisWebApp.Migrations.ApplicationDb
                     b.ToTable("postavke");
                 });
 
+            modelBuilder.Entity("ThesisWebApp.Models.LokacijaPredef", b =>
+                {
+                    b.HasOne("ThesisWebApp.Models.Most", "Most")
+                        .WithMany("Lokacije")
+                        .HasForeignKey("MostId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Most");
+                });
+
             modelBuilder.Entity("ThesisWebApp.Models.Merenje", b =>
                 {
                     b.HasOne("ThesisWebApp.Models.LokacijaPredef", "Lokacija")
                         .WithMany("Merenja")
                         .HasForeignKey("Ime")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Lokacija");
@@ -126,6 +180,11 @@ namespace ThesisWebApp.Migrations.ApplicationDb
             modelBuilder.Entity("ThesisWebApp.Models.LokacijaPredef", b =>
                 {
                     b.Navigation("Merenja");
+                });
+
+            modelBuilder.Entity("ThesisWebApp.Models.Most", b =>
+                {
+                    b.Navigation("Lokacije");
                 });
 #pragma warning restore 612, 618
         }

@@ -12,15 +12,15 @@ using ThesisWebApp.Data;
 namespace ThesisWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260328182605_LokacijePredefUloga")]
-    partial class LokacijePredefUloga
+    [Migration("20260328221246_InitialFullSchema")]
+    partial class InitialFullSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -116,6 +116,14 @@ namespace ThesisWebApp.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<double>("LimitAlarma")
+                        .HasColumnType("double precision")
+                        .HasColumnName("limit_alarma");
+
+                    b.Property<double>("LimitSrel")
+                        .HasColumnType("double precision")
+                        .HasColumnName("limit_srel");
+
                     b.Property<string>("Naziv")
                         .IsRequired()
                         .HasColumnType("text")
@@ -163,7 +171,7 @@ namespace ThesisWebApp.Migrations
                     b.HasOne("ThesisWebApp.Models.LokacijaPredef", "Lokacija")
                         .WithMany("Merenja")
                         .HasForeignKey("Ime")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Lokacija");

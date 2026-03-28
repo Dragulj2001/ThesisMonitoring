@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace ThesisWebApp.Migrations.ApplicationDb
+namespace ThesisWebApp.Migrations.ApplicationIdentityDb
 {
     /// <inheritdoc />
-    public partial class AddMostoviTable : Migration
+    public partial class IdentityFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
