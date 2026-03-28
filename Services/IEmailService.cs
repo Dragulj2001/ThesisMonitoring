@@ -9,6 +9,9 @@ public interface IEmailService
     /// <summary>Obaveštenje o uspešnom uvozu Excela za konkretan most.</summary>
     Task SendBridgeImportSuccessEmailAsync(string mostNaziv, int importedCount, CancellationToken cancellationToken = default);
 
+    /// <summary>Jedan zbirni mejl nakon Excel uvoza — prizme koje su imale d3d u alarmu.</summary>
+    Task SendImportAlarmBatchSummaryAsync(string mostNaziv, IReadOnlyList<string> prizmeUAlarmu, CancellationToken cancellationToken = default);
+
     /// <summary>Virtuelni senzor — S_rel u mm, limit u mm.</summary>
     Task SendSrelCriticalEmailAsync(string mostNaziv, double srelMm, double limitSrelMm, double limitAlarmaMm, CancellationToken cancellationToken = default);
 }

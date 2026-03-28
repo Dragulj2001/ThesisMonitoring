@@ -1016,7 +1016,6 @@ public class DataController : Controller
         }
 
         var alarmLimit = EffectiveLimitAlarma(mostZaUvoz.LimitAlarma);
-        var limitSrelEff = EffectiveLimitSrel(mostZaUvoz.LimitSrel);
 
         var lokacijeZaMost = await _context.LokacijePredef.AsNoTracking()
             .Where(l => l.MostId == mostId)
@@ -1024,6 +1023,7 @@ public class DataController : Controller
 
         var toAdd = new List<Merenje>();
         var alarmCount = 0;
+        var prizmeUAlarmu = new HashSet<string>(StringComparer.Ordinal);
         var preskoceneNepoznataPrizma = 0;
         var preskoceneImena = new HashSet<string>(StringComparer.Ordinal);
 
@@ -1115,7 +1115,10 @@ public class DataController : Controller
 
                 var status = ClassifyD3dStatus(d3d, alarmLimit);
                 if (status == "ALARM")
+                {
                     alarmCount++;
+                    prizmeUAlarmu.Add(imeCell);
+                }
 
                 toAdd.Add(new Merenje
                 {
@@ -1158,20 +1161,13 @@ public class DataController : Controller
 
         await TryNotifyVirtualSensorSrelCriticalAsync(mostId, HttpContext.RequestAborted);
 
-        if (alarmCount > 0)
+        if (prizmeUAlarmu.Count > 0)
         {
-            foreach (var mer in toAdd.Where(m => m.Status == "ALARM"))
-            {
-                var d3dV = mer.D3d ?? 0;
-                await _emailService.SendAlarmEmailAsync(
-                    mostZaUvoz.Naziv,
-                    mer.Ime,
-                    d3dV * 1000.0,
-                    alarmLimit * 1000.0,
-                    limitSrelEff * 1000.0,
-                    mer.Dt,
-                    HttpContext.RequestAborted);
-            }
+            var listaAlarmPrizmi = prizmeUAlarmu.OrderBy(s => s, StringComparer.Ordinal).ToList();
+            await _emailService.SendImportAlarmBatchSummaryAsync(
+                mostZaUvoz.Naziv,
+                listaAlarmPrizmi,
+                HttpContext.RequestAborted);
         }
 
         await _emailService.SendBridgeImportSuccessEmailAsync(mostZaUvoz.Naziv, toAdd.Count, HttpContext.RequestAborted);

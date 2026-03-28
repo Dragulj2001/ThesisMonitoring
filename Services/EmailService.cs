@@ -135,4 +135,24 @@ public class EmailService : IEmailService
 
         await TrySendAsync(message, cancellationToken);
     }
+
+    public async Task SendImportAlarmBatchSummaryAsync(string mostNaziv, IReadOnlyList<string> prizmeUAlarmu, CancellationToken cancellationToken = default)
+    {
+        if (prizmeUAlarmu == null || prizmeUAlarmu.Count == 0)
+            return;
+
+        var mostEnc = WebUtility.HtmlEncode(mostNaziv);
+        var lista = string.Join(", ", prizmeUAlarmu.Select(p => WebUtility.HtmlEncode(p)));
+
+        var body = "<p>Most <strong>" + mostEnc + "</strong>.</p>" +
+                   "<p>Detektovani alarmi na tačkama: <strong>" + lista + "</strong>.</p>";
+
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(_settings.SenderName, _settings.SenderEmail));
+        message.To.Add(MailboxAddress.Parse(_settings.ReceiverEmail));
+        message.Subject = "Zbirni izveštaj o alarmima";
+        message.Body = new TextPart("html") { Text = body };
+
+        await TrySendAsync(message, cancellationToken);
+    }
 }
