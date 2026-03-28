@@ -1,0 +1,39 @@
+**/.git
+**/.gitignore
+**/.dockerignore
+**/Dockerfile*
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/artifacts/
+
+# IDE / OS
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/.DS_Store
+**/Thumbs.db
+
+# Tests / coverage
+**/TestResults/
+**/*.trx
+**/coverage*
+
+# Logs & temp
+**/*.log
+**/logs/
+**/tmp/
+**/temp/
+
+# NuGet locals
+**/packages/
+**/*.nupkg
+
+# Publish profiles (may contain secrets)
+**/PublishProfiles/*.pubxml.user
+
+# Node (if added later)
+**/node_modules/
