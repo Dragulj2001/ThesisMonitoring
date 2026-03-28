@@ -1,0 +1,73 @@
+## Build outputs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+**/bin/
+**/obj/
+
+## .NET / NuGet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+nuget.exe
+*.nupkg
+*.snupkg
+**/packages/
+*.nuget.props
+*.nuget.targets
+
+## User-specific / secrets (do not commit)
+*.user
+*.userosscache
+*.suo
+*.rsuser
+*.sln.docstates
+*.userprefs
+appsettings.*.local.json
+secrets.json
+
+## Rider / VS Code / Visual Studio
+.idea/
+.vs/
+*.DotSettings.user
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+## Publish
+**/PublishProfiles/*.pubxml.user
+*.publishproj
+*.azurePubxml
+*.pubxml
+*.publish.xml
+
+## Test & coverage
+TestResults/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+*.opencover.xml
+
+## Others
+*.log
+*.tmp
+*.temp
+*.cache
+*.pidb
+*.svclog
+*.scc
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+## Node / front-end tooling (if you add later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
