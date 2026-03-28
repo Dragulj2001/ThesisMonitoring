@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ThesisWebApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+664d30b162b858bdd57f992151e57ab21eeb0130")]
 [assembly: System.Reflection.AssemblyProductAttribute("ThesisWebApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ThesisWebApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

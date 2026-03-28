@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using ThesisWebApp.Data;
 using ThesisWebApp.Models;
 using ThesisWebApp.Services;
@@ -56,10 +57,10 @@ app.MapRazorPages()
 
 using (var scope = app.Services.CreateScope())
 {
-    // Create identity tables if they don't exist yet (no migrations required for basic setup).
-    var identityDb = scope.ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>();
-    identityDb.Database.EnsureCreated();
-    await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+    var services = scope.ServiceProvider;
+    await services.GetRequiredService<ApplicationIdentityDbContext>().Database.MigrateAsync();
+    await services.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+    await IdentitySeeder.SeedAsync(services);
 }
 
 app.Run();

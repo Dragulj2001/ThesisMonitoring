@@ -19,93 +19,93 @@ build_property.TargetFrameworkIdentifier = .NETCoreApp
 build_property.TargetFrameworkVersion = v10.0
 build_property.RootNamespace = ThesisWebApp
 build_property.RootNamespace = ThesisWebApp
-build_property.ProjectDir = C:\Users\Nikola\Desktop\Bachelor Project\ThesisWebApp\
+build_property.ProjectDir = c:\Users\Nikola\Desktop\Bachelor Project\ThesisWebApp\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\Nikola\Desktop\Bachelor Project\ThesisWebApp
+build_property.MSBuildProjectDirectory = c:\Users\Nikola\Desktop\Bachelor Project\ThesisWebApp
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Areas/Identity/Pages/Account/Login.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Areas/Identity/Pages/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Areas/Identity/Pages/Account/Logout.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Areas/Identity/Pages/Account/Logout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcQWNjb3VudFxMb2dvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Areas/Identity/Pages/Account/Register.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Areas/Identity/Pages/Account/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Areas/Identity/Pages/_ViewImports.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Areas/Identity/Pages/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Error.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Index.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Login.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Podaci.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Podaci.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUG9kYWNpLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Privacy.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJpdmFjeS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Shared/_ValidationScriptsPartial.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/_ViewImports.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/_ViewStart.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Data/Analiza.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Data/Analiza.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGF0YVxBbmFsaXphLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Data/Index.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Data/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGF0YVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Data/StrukturnaAnaliza.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Data/StrukturnaAnaliza.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGF0YVxTdHJ1a3R1cm5hQW5hbGl6YS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Shared/_Layout.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Shared/_LoginPartial.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/Shared/_LoginPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Mb2dpblBhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/_ViewImports.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/_ViewStart.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Shared/_Layout.cshtml]
+[c:/Users/Nikola/Desktop/Bachelor Project/ThesisWebApp/Pages/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-cd5d3t7z3b

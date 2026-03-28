@@ -352,3 +352,4 @@ C:\Users\Nikola\AppData\Local\Temp\ThesisAck\ThesisWebApp.runtimeconfig.json
 C:\Users\Nikola\AppData\Local\Temp\ThesisAck\ThesisWebApp.dll
 C:\Users\Nikola\AppData\Local\Temp\ThesisAck\ThesisWebApp.pdb
 C:\Users\Nikola\Desktop\Bachelor Project\ThesisWebApp\obj\Debug\net10.0\compressed\fvx34chym9-{0}-qkxl2ptd4s-qkxl2ptd4s.gz
+c:\Users\Nikola\Desktop\Bachelor Project\ThesisWebApp\obj\Debug\net10.0\ThesisWebApp.sourcelink.json
