@@ -213,8 +213,8 @@
                             <button type="button" class="btn btn-primary" title="Novo merenje" data-bs-toggle="modal" data-bs-target="#newMeasurementModal">
                                 <i class="bi bi-rulers"></i> Novo merenje
                             </button>
-                            <button type="button" class="btn btn-warning" title="Izmeni prizmu" data-bs-toggle="modal" data-bs-target="#editPrismModal" @(hasSelection ? "" : "disabled")>
-                                <i class="bi bi-pencil"></i> Izmeni prizmu
+                            <button type="button" class="btn btn-warning" title="Edituj prizmu" data-bs-toggle="modal" data-bs-target="#editPrismModal" @(hasSelection ? "" : "disabled")>
+                                <i class="bi bi-pencil"></i> Edituj prizmu
                             </button>
                             <button type="button" class="btn btn-success" title="Dodaj novu prizmu" data-bs-toggle="modal" data-bs-target="#addPrismModal">
                                 <i class="bi bi-plus-lg"></i> Dodaj novu
@@ -498,7 +498,7 @@
                             <input type="number" step="0.01" min="0" class="form-control" id="alarmLimitInput" name="alarmLimit" value="@Model.AlarmLimit.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                         </div>
                         <div class="mb-3">
-                            <label for="limitSrelInput" class="form-label">Limit virtuelnog senzora (|S_rel|)</label>
+                            <label for="limitSrelInput" class="form-label">Limit virtuelnog senzora (|dZ<sub>dif</sub>|)</label>
                             <input type="number" step="0.001" min="0" class="form-control" id="limitSrelInput" name="limitSrel" value="@Model.LimitSrel.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                             <div class="form-text">Podrazumevano 0.02 (npr. 20 mm ako su jedinice u metrima).</div>
                         </div>
@@ -548,7 +548,7 @@
                             Prizma: <strong class="text-body">@Model.SelectedIme</strong>
                             @if (!string.IsNullOrWhiteSpace(Model.SelectedUloga))
                             {
-                                <span> · Uloga: <strong class="text-body">@Model.SelectedUloga</strong></span>
+                                <span> · Pozicija: <strong class="text-body">@Model.SelectedUloga</strong></span>
                             }
                         </div>
                         <div class="mb-2">
@@ -576,9 +576,9 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>Datum / vreme</th>
-                                        <th>Y</th>
-                                        <th>X</th>
-                                        <th>Z</th>
+                                        <th>Y (m)</th>
+                                        <th>X (m)</th>
+                                        <th>Z (m)</th>
                                         <th>Dy</th>
                                         <th>Dx</th>
                                         <th>Dz</th>
@@ -615,13 +615,13 @@
                                         }
                                         <tr class="@rowClass">
                                             <td>@m.Dt.ToString("yyyy-MM-dd HH:mm")</td>
-                                            <td>@m.Y</td>
-                                            <td>@m.X</td>
-                                            <td>@m.Z</td>
-                                            <td>@m.Dy</td>
-                                            <td>@m.Dx</td>
-                                            <td>@m.Dz</td>
-                                            <td>@m.D3d</td>
+                                            <td>@(m.Y?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                            <td>@(m.X?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                            <td>@(m.Z?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                            <td>@(m.Dy?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                            <td>@(m.Dx?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                            <td>@(m.Dz?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                            <td>@(m.D3d?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
                                             <td>
                                                 <span class="badge @badgeClass @(statusText == "ALARM" ? "alarm-pulse" : "")">@statusText</span>
                                             </td>

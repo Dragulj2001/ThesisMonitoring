@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using ThesisWebApp.Data;
 using ThesisWebApp.Models;
 using ThesisWebApp.Services;
@@ -30,9 +32,19 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationIdentityDbContext>();
 
+// Iza reverse proxy-ja (npr. Render): X-Forwarded-For / X-Forwarded-Proto da Request.Scheme bude https.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseForwardedHeaders();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -79,8 +91,24 @@ else
         else
         {
             Console.WriteLine("@@@ Pokušavam migraciju baze podataka... @@@");
-            await services.GetRequiredService<ApplicationIdentityDbContext>().Database.MigrateAsync();
-            await services.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+            try
+            {
+                await services.GetRequiredService<ApplicationIdentityDbContext>().Database.MigrateAsync();
+            }
+            catch (PostgresException ex) when (ex.SqlState == "42P07")
+            {
+                app.Logger.LogWarning("Preskačem Identity migraciju jer tabela već postoji ({MessageText}).", ex.MessageText);
+            }
+
+            try
+            {
+                await services.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+            }
+            catch (PostgresException ex) when (ex.SqlState == "42P07")
+            {
+                app.Logger.LogWarning("Preskačem aplikacionu migraciju jer tabela već postoji ({MessageText}).", ex.MessageText);
+            }
+
             await IdentitySeeder.SeedAsync(services);
             Console.WriteLine("@@@ Migracija i Seed završeni uspešno! @@@");
         }

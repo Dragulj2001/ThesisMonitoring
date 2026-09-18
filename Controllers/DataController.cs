@@ -215,8 +215,8 @@ public class DataController : Controller
         model.SelectedMostId = selectedMostId;
         model.TipMosta = mostRow.Tip;
         model.SrelFormulaOpis = jedanStub
-            ? "S_rel = dZ_Sredina − dZ_Vrh (jedan stub — referenca jednog vrha pylona)."
-            : "S_rel = dZ_Sredina − (dZ_Vrh1 + dZ_Vrh2) / 2 (dva stuba — referenca oba vrha).";
+            ? "dZ<sub>dif</sub> = &Delta;Z<sub>sredina</sub> &minus; &Delta;Z<sub>vrh_stuba</sub>"
+            : "dZ<sub>dif</sub> = &Delta;Z<sub>sredina</sub> &minus; (&Delta;Z<sub>vrh_stuba_1</sub> + &Delta;Z<sub>vrh_stuba_2</sub>) / 2";
 
         var lokacije = await _context.LokacijePredef.AsNoTracking()
             .Where(l => l.MostId == selectedMostId && l.Uloga != null && l.Uloga != "")
@@ -1246,7 +1246,7 @@ public class DataController : Controller
         if (alarmLimit <= 0 || alarmLimit > 1000)
             return BadRequest("Granica alarma (d3d) mora biti između 0 i 1000.");
         if (limitSrel <= 0 || limitSrel > 1000)
-            return BadRequest("Limit S_rel mora biti između 0 i 1000.");
+            return BadRequest("Limit dZ_dif mora biti između 0 i 1000.");
 
         var most = await _context.Mostovi.FirstOrDefaultAsync(m => m.Id == mostId);
         if (most == null)

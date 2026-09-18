@@ -102,17 +102,17 @@
                             <th class="ps-3 col-most">Most</th>
                             <th class="ps-2">Ime</th>
                             <th>Datum / vreme (dt)</th>
-                            <th>Y</th>
-                            <th>X</th>
-                            <th>Z</th>
+                            <th>Y (m)</th>
+                            <th>X (m)</th>
+                            <th>Z (m)</th>
                             <th>Dy</th>
                             <th>Dx</th>
                             <th>Dz</th>
                             <th>D3d</th>
                             <th>Status</th>
-                            <th>Y koord</th>
-                            <th>X koord</th>
-                            <th class="pe-3">Z koord</th>
+                            <th>Y koord (m)</th>
+                            <th>X koord (m)</th>
+                            <th class="pe-3">Z koord (m)</th>
                         </tr>
                     </thead>
                     <tbody id="dataTableBody">
@@ -150,19 +150,19 @@
                                     <a href="@Url.Action("Analiza", "Data", new { mostId = item.MostId, prizmaIme = item.Ime })" class="text-primary text-decoration-none">@item.Ime</a>
                                 </td>
                                 <td class="dt-cell">@item.Dt.ToString("yyyy-MM-dd HH:mm")</td>
-                                <td>@(item.Y?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
-                                <td>@(item.X?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
-                                <td>@(item.Z?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
-                                <td>@(item.Dy?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
-                                <td>@(item.Dx?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
-                                <td>@(item.Dz?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
-                                <td>@(item.D3d?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Y?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.X?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Z?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Dy?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Dx?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.Dz?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.D3d?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
                                 <td>
                                     <span class="badge @badgeClass @(statusText == "ALARM" ? "alarm-pulse" : "")">@statusText</span>
                                 </td>
-                                <td>@(item.YKoord?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
-                                <td>@(item.XKoord?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
-                                <td class="pe-3">@(item.ZKoord?.ToString("F5", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.YKoord?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td>@(item.XKoord?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
+                                <td class="pe-3">@(item.ZKoord?.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) ?? "")</td>
                             </tr>
                         }
                     </tbody>

@@ -284,7 +284,7 @@
                         @foreach (var m in Model.Markers)
                         {
                             var d3dText = m.LatestD3d.HasValue
-                                ? m.LatestD3d.Value.ToString("F4", CultureInfo.InvariantCulture)
+                                ? m.LatestD3d.Value.ToString("F3", CultureInfo.InvariantCulture)
                                 : "—";
                             var statusText = m.StatusTier switch
                             {
@@ -324,8 +324,8 @@
         <div class="card-header bg-light d-flex flex-wrap align-items-center justify-content-between gap-2">
             <span class="fw-semibold">Virtuelni senzor — relativno ulegnuće</span>
             <span class="d-flex flex-wrap align-items-center gap-2">
-                <span class="badge text-bg-danger">Limit |S_rel|: @limitSrel.ToString("F4", CultureInfo.InvariantCulture)</span>
-                <span class="small mb-0 text-body-secondary">@Model.SrelFormulaOpis</span>
+                <span class="badge text-bg-danger">Limit |dZ<sub>dif</sub>|: @limitSrel.ToString("F4", CultureInfo.InvariantCulture)</span>
+                <span class="small mb-0 text-body-secondary">@Html.Raw(Model.SrelFormulaOpis)</span>
             </span>
         </div>
         <div class="card-body">
@@ -427,7 +427,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'S_rel',
+                    label: 'dZdif',
                     data: values,
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.12)',
@@ -472,7 +472,7 @@
                         }
                     },
                     y: {
-                        title: { display: true, text: 'S_rel' },
+                        title: { display: true, text: 'dZdif' },
                         suggestedMin: ySuggestedMin,
                         suggestedMax: ySuggestedMax
                     }
